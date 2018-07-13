@@ -1,0 +1,28 @@
+Sub ConvNCR()
+    Dim regex As New RegExp
+    Dim i, j As Integer
+    Dim s As String
+    
+    'pattern of Decimal NCR
+    regex.Pattern = "&#((\w+));"  
+    regex.Global = True
+    regex.IgnoreCase = True
+    regex.MultiLine = True
+    
+    For i = 1 To Cells(ActiveSheet.Rows.Count, 1).End(xlUp).Row
+        For j = 1 To Cells(1, ActiveSheet.Columns.Count).End(xlToLeft).Column
+            s = Cells(i, j).Value
+            If Not IsNull(s) Then
+                If regex.Test(s) Then
+                    t = regex.Execute(s)(0).SubMatches(0)
+                    If InStr(t, "x") Then   
+                        'to deal with hex NCR &#x1234;
+                        t = WorksheetFunction.Hex2Dec(Right(t, 4))
+                    End If
+                    'relace by real "word"
+                    Cells(i, j).Value = regex.Replace(s, WorksheetFunction.Unichar(t))
+                End If
+            End If
+        Next j
+    Next i    
+End Sub
